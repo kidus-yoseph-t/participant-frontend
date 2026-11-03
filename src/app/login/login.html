@@ -1,0 +1,53 @@
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-primary p-3">
+  <div class="card border-0 shadow-lg rounded-4 w-100 bg-" style="max-width: 420px;">
+    <div class="card-body p-4 p-md-5">
+      <div class="text-center mb-4">
+        <div class="rounded-circle bg-dark text-white d-inline-flex align-items-center
+                    justify-content-center fs-4 fw-bold mb-3"
+             style="width: 56px; height: 56px;">A</div>
+        <h1 class="h3 fw-bold mb-1">Welcome back</h1>
+        <p class="text-body-secondary mb-0">Sign in to continue</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate>
+
+        <div class="form-floating mb-3">
+          <input type="text" id="username"
+                 class="form-control bg-light border-0 rounded-3"
+                 placeholder="Username"
+                 formControlName="username" autocomplete="username"
+                 [class.is-invalid]="username.invalid && username.touched">
+          <label for="username">Username</label>
+          <div class="invalid-feedback">Username is required.</div>
+        </div>
+        <div class="form-floating mb-3 position-relative">
+          <input [type]="showPassword() ? 'text' : 'password'" id="password"
+                 class="form-control bg-light border-0 rounded-3 pe-5"
+                 placeholder="Password"
+                 formControlName="password" autocomplete="current-password"
+                 [class.is-invalid]="password.invalid && password.touched">
+          <label for="password">Password</label>
+          <button type="button"
+                  class="btn btn-sm btn-link text-dark text-decoration-none
+                         position-absolute top-50 end-0 translate-middle-y me-2"
+                  style="z-index: 5;"
+                  (click)="toggle()">
+            {{ showPassword() ? 'Hide' : 'Show' }}
+          </button>
+          <div class="invalid-feedback">Password is required.</div>
+        </div>
+
+        <button type="submit" class="btn btn-brand bg-primary-subtle btn-lg nav-pill w-100" [disabled]="!loginForm.valid" >Login</button>
+      </form>
+
+      @if (message()) {
+        <div class="alert mt-4 mb-0 border-0 rounded-3"
+             [class.alert-success]="isSuccess()"
+             [class.alert-danger]="!isSuccess()"
+             role="alert">
+          {{ message() }}
+        </div>
+      }
+    </div>
+  </div>
+</div>
