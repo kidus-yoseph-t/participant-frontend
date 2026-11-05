@@ -1,5 +1,6 @@
 import { Component, inject, signal} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   imports: [ ReactiveFormsModule],
@@ -9,6 +10,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 })
 export class Login {
   private formbuilder = inject(FormBuilder);
+  private router = inject(Router);
 
   private validUsername:string = 'admin';
   private validPassword:string = 'Admin@123';
@@ -45,6 +47,7 @@ export class Login {
     if(username === this.validUsername && password === this.validPassword) {
       this.isSuccess.set(true);
       this.message.set('Login successful!');
+      this.router.navigate(['/participants']);
     } else {
       this.isSuccess.set(false);
       this.message.set('Invalid username or password.');
