@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { Login } from './login/login'
-import {Participants } from './participants/participants'
+import { Participants } from './participants/participants'
 import { NotFound } from './not-found/not-found';
+import { ParticipantForm } from './participant-form/participant-form';
 
 export const routes: Routes = [
     {
@@ -17,6 +18,11 @@ export const routes: Routes = [
     {
         path: 'participants',
         component: Participants,
+        title: 'participants'
+    },
+    {
+        path:'participants/new',
+        component: ParticipantForm,
         title: 'participants'
     },
     {
