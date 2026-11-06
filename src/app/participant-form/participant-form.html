@@ -1,0 +1,94 @@
+<div class="min-vh-100 bg-secondary-subtle d-flex flex-column">
+  <app-top-navigation-bar />
+
+  <div class="flex-grow-1 d-flex justify-content-center align-items-center p-3">
+    <div class="card border-0 shadow-lg rounded-4 w-100" style="max-width: 640px;">
+      <div class="card-body p-4 p-md-5">
+
+        <div class="mb-4">
+          <h1 class="h3 fw-bold mb-1">Add Participant</h1>
+          <p class="text-body-secondary mb-0">Register a new participant bank</p>
+        </div>
+
+        <form [formGroup]="addForm" (ngSubmit)="submit()" >
+          <div class="row g-3">
+
+            <div class="col-12 col-md-6">
+              <div class="form-floating">
+                <input type="text" id="name" placeholder="Name"
+                       formControlName="name"
+                       class="form-control bg-light border-0 rounded-3"
+                       [class.is-invalid]="isInvalid('name')">
+                <label for="name">Name</label>
+                <div class="invalid-feedback">Name is required.</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="form-floating">
+                <input type="text" id="bic" placeholder="BIC"
+                       formControlName="bic"
+                       class="form-control bg-light border-0 rounded-3 text-uppercase"
+                       [class.is-invalid]="isInvalid('bic')">
+                <label for="bic">BIC</label>
+                <div class="invalid-feedback">Enter a valid BIC (8 or 11 characters).</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="form-floating">
+                <input type="text" id="shortname" placeholder="Short Name"
+                       formControlName="shortname"
+                       class="form-control bg-light border-0 rounded-3"
+                       [class.is-invalid]="isInvalid('shortname')">
+                <label for="shortname">Short Name</label>
+                <div class="invalid-feedback">Short name is required.</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="form-floating">
+                <select id="status" formControlName="status"
+                        class="form-select bg-light border-0 rounded-3">
+                  <option selected value="ACTIVE" class="bg-success">ACTIVE</option>
+                  <option value="INACTIVE" class="bg-danger">INACTIVE</option>
+                </select>
+                <label for="status">Status</label>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="form-floating">
+                <input type="email" id="email" placeholder="Email"
+                       formControlName="email" autocomplete="email"
+                       class="form-control bg-light border-0 rounded-3"
+                       [class.is-invalid]="isInvalid('email')">
+                <label for="email">Email</label>
+                <div class="invalid-feedback">Enter a valid email address.</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="form-floating">
+                <input type="tel" id="phone" placeholder="Phone"
+                       formControlName="phone" autocomplete="tel"
+                       class="form-control bg-light border-0 rounded-3"
+                       [class.is-invalid]="isInvalid('phone')">
+                <label for="phone">Phone</label>
+                <div class="invalid-feedback">Phone number is required.</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-outline-dark rounded-pill px-4"
+                    (click)="cancel()">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-pill px-4" [disabled]="addForm.invalid">Save</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
