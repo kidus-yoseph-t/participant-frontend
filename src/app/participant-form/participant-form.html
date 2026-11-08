@@ -1,4 +1,4 @@
-<div class="min-vh-100 bg-secondary-subtle d-flex flex-column">
+<div class="min-vh-100 bg-primary d-flex flex-column">
   <app-top-navigation-bar />
 
   <div class="flex-grow-1 d-flex justify-content-center align-items-center p-3">
@@ -6,17 +6,18 @@
       <div class="card-body p-4 p-md-5">
 
         <div class="mb-4">
-          <h1 class="h3 fw-bold mb-1">Add Participant</h1>
-          <p class="text-body-secondary mb-0">Register a new participant bank</p>
+          <h1 class="h3 fw-bold mb-1">{{ isEdit ? 'Edit Participant' : 'Add Participant' }}</h1>
+          <p class="text-body-secondary mb-0">
+            {{ isEdit ? 'Update the participant bank details' : 'Register a new participant bank' }}
+          </p>
         </div>
 
-        <form [formGroup]="addForm" (ngSubmit)="submit()" >
+        <form [formGroup]="addForm" (ngSubmit)="submit()" novalidate>
           <div class="row g-3">
 
             <div class="col-12 col-md-6">
               <div class="form-floating">
-                <input type="text" id="name" placeholder="Name"
-                       formControlName="name"
+                <input type="text" id="name" placeholder="Name" formControlName="name"
                        class="form-control bg-light border-0 rounded-3"
                        [class.is-invalid]="isInvalid('name')">
                 <label for="name">Name</label>
@@ -26,8 +27,7 @@
 
             <div class="col-12 col-md-6">
               <div class="form-floating">
-                <input type="text" id="bic" placeholder="BIC"
-                       formControlName="bic"
+                <input type="text" id="bic" placeholder="BIC" formControlName="bic"
                        class="form-control bg-light border-0 rounded-3 text-uppercase"
                        [class.is-invalid]="isInvalid('bic')">
                 <label for="bic">BIC</label>
@@ -37,8 +37,7 @@
 
             <div class="col-12 col-md-6">
               <div class="form-floating">
-                <input type="text" id="shortname" placeholder="Short Name"
-                       formControlName="shortname"
+                <input type="text" id="shortname" placeholder="Short Name" formControlName="shortname"
                        class="form-control bg-light border-0 rounded-3"
                        [class.is-invalid]="isInvalid('shortname')">
                 <label for="shortname">Short Name</label>
@@ -50,8 +49,8 @@
               <div class="form-floating">
                 <select id="status" formControlName="status"
                         class="form-select bg-light border-0 rounded-3">
-                  <option selected value="ACTIVE" class="bg-success">ACTIVE</option>
-                  <option value="INACTIVE" class="bg-danger">INACTIVE</option>
+                  <option value="ACTIVE">ACTIVE</option>
+                  <option value="INACTIVE">INACTIVE</option>
                 </select>
                 <label for="status">Status</label>
               </div>
@@ -59,8 +58,8 @@
 
             <div class="col-12 col-md-6">
               <div class="form-floating">
-                <input type="email" id="email" placeholder="Email"
-                       formControlName="email" autocomplete="email"
+                <input type="email" id="email" placeholder="Email" formControlName="email"
+                       autocomplete="email"
                        class="form-control bg-light border-0 rounded-3"
                        [class.is-invalid]="isInvalid('email')">
                 <label for="email">Email</label>
@@ -70,8 +69,8 @@
 
             <div class="col-12 col-md-6">
               <div class="form-floating">
-                <input type="tel" id="phone" placeholder="Phone"
-                       formControlName="phone" autocomplete="tel"
+                <input type="tel" id="phone" placeholder="Phone" formControlName="phone"
+                       autocomplete="tel"
                        class="form-control bg-light border-0 rounded-3"
                        [class.is-invalid]="isInvalid('phone')">
                 <label for="phone">Phone</label>
@@ -84,7 +83,9 @@
           <div class="d-flex justify-content-end gap-2 mt-4">
             <button type="button" class="btn btn-outline-dark rounded-pill px-4"
                     (click)="cancel()">Cancel</button>
-            <button type="submit" class="btn btn-primary rounded-pill px-4" [disabled]="addForm.invalid">Save</button>
+            <button type="submit" class="btn btn-brand rounded-pill px-4">
+              {{ isEdit ? 'Update' : 'Save' }}
+            </button>
           </div>
         </form>
 

@@ -26,6 +26,10 @@ export const routes: Routes = [
         title: 'participants'
     },
     {
+        path: 'participants/edit/:id',
+        component: ParticipantForm 
+    },
+    {
         path: '**',
         component: NotFound,
         title: 'Not Found'
