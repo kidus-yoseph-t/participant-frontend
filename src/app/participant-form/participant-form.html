@@ -15,47 +15,71 @@
         <form [formGroup]="addForm" (ngSubmit)="submit()" novalidate>
           <div class="row g-3">
 
+            <!-- Name -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="text" id="name" placeholder="Name" formControlName="name"
                        class="form-control bg-light border-0 rounded-3"
                        [class.is-invalid]="isInvalid('name')">
                 <label for="name">Name</label>
-                <div class="invalid-feedback">Name is required.</div>
+                <div class="invalid-feedback">
+                  @if (hasError('name', 'required')) { Name is required. }
+                </div>
               </div>
             </div>
 
+            <!-- BIC -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="text" id="bic" placeholder="BIC" formControlName="bic"
+                       maxlength="30"
                        class="form-control bg-light border-0 rounded-3 text-uppercase"
                        [class.is-invalid]="isInvalid('bic')">
                 <label for="bic">BIC</label>
-                <div class="invalid-feedback">Enter a valid BIC (8 or 11 characters).</div>
+                <div class="invalid-feedback">
+                  @if (hasError('bic', 'required')) {
+                    BIC is required.
+                  } @else if (hasError('bic', 'minlength')) {
+                    BIC must be at least 8 characters.
+                  } @else if (hasError('bic', 'maxlength')) {
+                    BIC must be at most 11 characters.
+                  } @else if (hasError('bic', 'pattern')) {
+                    BIC can contain only letters and numbers.
+                  }
+                </div>
               </div>
             </div>
 
+            <!-- Short name -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="text" id="shortname" placeholder="Short Name" formControlName="shortname"
                        class="form-control bg-light border-0 rounded-3"
                        [class.is-invalid]="isInvalid('shortname')">
                 <label for="shortname">Short Name</label>
-                <div class="invalid-feedback">Short name is required.</div>
+                <div class="invalid-feedback">
+                  @if (hasError('shortname', 'required')) { Short name is required. }
+                </div>
               </div>
             </div>
 
+            <!-- Status -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <select id="status" formControlName="status"
-                        class="form-select bg-light border-0 rounded-3">
+                        class="form-select bg-light border-0 rounded-3"
+                        [class.is-invalid]="isInvalid('status')">
                   <option value="ACTIVE">ACTIVE</option>
                   <option value="INACTIVE">INACTIVE</option>
                 </select>
                 <label for="status">Status</label>
+                <div class="invalid-feedback">
+                  @if (hasError('status', 'required')) { Status is required. }
+                </div>
               </div>
             </div>
 
+            <!-- Email -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="email" id="email" placeholder="Email" formControlName="email"
@@ -63,10 +87,17 @@
                        class="form-control bg-light border-0 rounded-3"
                        [class.is-invalid]="isInvalid('email')">
                 <label for="email">Email</label>
-                <div class="invalid-feedback">Enter a valid email address.</div>
+                <div class="invalid-feedback">
+                  @if (hasError('email', 'required')) {
+                    Email is required.
+                  } @else if (hasError('email', 'email')) {
+                    Enter a valid email address.
+                  }
+                </div>
               </div>
             </div>
 
+            <!-- Phone -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="tel" id="phone" placeholder="Phone" formControlName="phone"
@@ -74,7 +105,9 @@
                        class="form-control bg-light border-0 rounded-3"
                        [class.is-invalid]="isInvalid('phone')">
                 <label for="phone">Phone</label>
-                <div class="invalid-feedback">Phone number is required.</div>
+                <div class="invalid-feedback">
+                  @if (hasError('phone', 'required')) { Phone number is required. }
+                </div>
               </div>
             </div>
 
@@ -83,7 +116,8 @@
           <div class="d-flex justify-content-end gap-2 mt-4">
             <button type="button" class="btn btn-outline-dark rounded-pill px-4"
                     (click)="cancel()">Cancel</button>
-            <button type="submit" class="btn btn-brand rounded-pill px-4">
+            <button type="submit" class="btn btn-brand rounded-pill px-4"
+                    [disabled]="addForm.invalid">
               {{ isEdit ? 'Update' : 'Save' }}
             </button>
           </div>

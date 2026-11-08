@@ -23,17 +23,22 @@ export class ParticipantForm implements OnInit {
   }
 
   addForm = this.formBuilder.nonNullable.group({
-    name: ['', Validators.required],
-    bic: ['', [Validators.required, Validators.pattern(/^[A-Za-z]{6}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$/)]],
-    shortname: ['', Validators.required],
+    name: ['', [Validators.required]],
+    bic: ['', [
+      Validators.required,
+      Validators.minLength(8),
+      Validators.maxLength(11),
+      Validators.pattern(/^[A-Za-z0-9]+$/),
+    ]],
+    shortname: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
-    phone: ['', Validators.required],
-    status: ['ACTIVE' as ParticipantsModel['status'], Validators.required],
+    phone: ['', [Validators.required]],
+    status: ['ACTIVE' as ParticipantsModel['status'], [Validators.required]],
   });
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam === null) return;                       // no :id in the URL, so add mode
+    if (idParam === null) return;
 
     const id = Number(idParam);
     const participant = Number.isInteger(id)
@@ -57,9 +62,16 @@ export class ParticipantForm implements OnInit {
     });
   }
 
+  // Red border: invalid AND touched
   isInvalid(field: string): boolean {
     const control = this.addForm.get(field);
     return !!control && control.touched && control.invalid;
+  }
+
+  // Specific message: this exact error AND touched
+  hasError(field: string, error: string): boolean {
+    const control = this.addForm.get(field);
+    return !!control && control.touched && control.hasError(error);
   }
 
   submit(): void {
@@ -83,7 +95,6 @@ export class ParticipantForm implements OnInit {
     } else {
       this.participantService.addParticipants(payload);
     }
-
     this.router.navigate(['/participants']);
   }
 
