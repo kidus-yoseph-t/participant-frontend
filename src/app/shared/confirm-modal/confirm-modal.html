@@ -1,0 +1,26 @@
+   @if (open()) {
+      <div class="modal-backdrop fade show"></div>
+
+      <div class="modal fade show d-block" tabindex="-1" role="dialog"
+           aria-modal="true" (click)="cancel()">
+        <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+          <div class="modal-content border-0 rounded-4 shadow">
+
+            <div class="modal-header border-0 pb-0">
+              <h5 class="modal-title fw-bold">{{ title() }}</h5>
+              <button type="button" class="btn-close" aria-label="Close" (click)="cancel()"></button>
+            </div>
+
+            <div class="modal-body">{{ message() }}</div>
+
+            <div class="modal-footer border-0 pt-0">
+              <button type="button" class="btn btn-outline-dark rounded-pill px-4"
+                      (click)="cancel()">Cancel</button>
+              <button type="button" class="btn btn-danger rounded-pill px-4"
+                      (click)="confirmed.emit()">{{ confirmText() }}</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    }

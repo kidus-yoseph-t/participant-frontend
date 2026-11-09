@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ParticipantsModel } from '../core/models/participants.model';
 import { ParticipantService } from '../core/services/participant-service';
 import { TopNavigationBar } from '../layouts/top-navigation-bar/top-navigation-bar';
+import { NotificationServices } from '../core/services/notification-services';
 
 @Component({
   imports: [ReactiveFormsModule, TopNavigationBar],
@@ -15,6 +16,7 @@ export class ParticipantForm implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private participantService = inject(ParticipantService);
+  private notify = inject(NotificationServices)
 
   editId: number | null = null;
   saving = signal(false);
@@ -40,7 +42,7 @@ export class ParticipantForm implements OnInit {
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam === null) return;                       // no :id in the URL, so add mode
+    if (idParam === null) return;
 
     const id = Number(idParam);
     if (!Number.isInteger(id)) {
@@ -102,12 +104,19 @@ export class ParticipantForm implements OnInit {
       : this.participantService.addParticipants(payload);
 
     request$.subscribe({
-      next: () => this.router.navigate(['/participants']),
-      error: () => {
-        this.serverError.set('Could not save. Please check the data and try again.');
-        this.saving.set(false);
-      },
-    });
+    next: () => {
+      this.notify.success(
+        this.editId !== null
+          ? 'Participant updated successfully.'
+          : 'Participant saved successfully.'
+      );
+      this.router.navigate(['/participants']);
+    },
+    error: () => {
+      this.notify.error('Could not save the participant. Please check the data and try again.');
+      this.saving.set(false);
+    },
+});
   }
 
   cancel(): void {

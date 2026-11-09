@@ -1,0 +1,14 @@
+ <div class="position-fixed bottom-0 end-0 p-3 d-flex flex-column gap-2"
+         style="z-index: 2100; max-width: 380px;">
+      @for (t of notifications.toasts(); track t.id) {
+        <div class="alert shadow border-0 rounded-3 mb-0 d-flex align-items-center
+                    justify-content-between gap-3"
+             [class.alert-success]="t.type === 'success'"
+             [class.alert-danger]="t.type === 'danger'"
+             role="alert">
+          <span>{{ t.message }}</span>
+          <button type="button" class="btn-close" aria-label="Close"
+                  (click)="notifications.dismiss(t.id)"></button>
+        </div>
+      }
+    </div>
