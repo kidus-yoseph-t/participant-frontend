@@ -1,9 +1,11 @@
 export interface ParticipantsModel {
-    id: number;
+    id?: number;
     name: string;
     bic: string;
     shortName: string;
+    address?: string;
     email: string;
-    phoneNumber: string;
-    status: 'ACTIVE' | 'INACTIVE';
+    phoneNumber?: string;
+    logoPath?: string;
+    status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 }

@@ -1,10 +1,12 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of, switchMap, tap, throwError } from 'rxjs';
 import { ParticipantsModel } from '../core/models/participants.model';
 import { ParticipantService } from '../core/services/participant-service';
-import { TopNavigationBar } from '../layouts/top-navigation-bar/top-navigation-bar';
 import { NotificationServices } from '../core/services/notification-services';
+import { TopNavigationBar } from '../layouts/top-navigation-bar/top-navigation-bar';
 
 @Component({
   imports: [ReactiveFormsModule, TopNavigationBar],
@@ -16,11 +18,16 @@ export class ParticipantForm implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private participantService = inject(ParticipantService);
-  private notify = inject(NotificationServices)
+  private notify = inject(NotificationServices);
+
+  private readonly maxFileSize = 1024 * 1024;   // 1 MB (Spring's default upload limit)
+  private existingLogoUrl: string | null = null;
+  selectedFile: File | null = null;
 
   editId: number | null = null;
   saving = signal(false);
-  serverError = signal('');
+  previewUrl = signal<string | null>(null);
+  fileError = signal('');
 
   get isEdit(): boolean {
     return this.editId !== null;
@@ -42,7 +49,7 @@ export class ParticipantForm implements OnInit {
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam === null) return;
+    if (idParam === null) return;                       // add mode
 
     const id = Number(idParam);
     if (!Number.isInteger(id)) {
@@ -64,20 +71,54 @@ export class ParticipantForm implements OnInit {
         phone: participant.phoneNumber,
         status: participant.status,
       });
+      this.existingLogoUrl = this.participantService.logoUrl(participant);
+      this.previewUrl.set(this.existingLogoUrl);
     });
   }
 
   private notFound(): void {
-    alert('Participant not found.');
+    this.notify.error('Participant not found.');
     this.router.navigate(['/participants']);
   }
+
   isInvalid(field: string): boolean {
     const control = this.addForm.get(field);
     return !!control && control.touched && control.invalid;
   }
-  hasError(field: string, error: string): boolean {
+
+  showError(field: string, error: string): boolean {
     const control = this.addForm.get(field);
     return !!control && control.touched && control.hasError(error);
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.fileError.set('');
+    if (!file) return;
+
+    if (!['image/png', 'image/jpeg'].includes(file.type)) {
+      this.rejectFile(input, 'Only PNG or JPG images are allowed.');
+      return;
+    }
+    if (file.size > this.maxFileSize) {
+      this.rejectFile(input, 'The image must be 1 MB or smaller.');
+      return;
+    }
+
+    this.selectedFile = file;
+
+    // Instant preview
+    const reader = new FileReader();
+    reader.onload = () => this.previewUrl.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  private rejectFile(input: HTMLInputElement, message: string): void {
+    input.value = '';
+    this.selectedFile = null;
+    this.previewUrl.set(this.existingLogoUrl);
+    this.fileError.set(message);
   }
 
   submit(): void {
@@ -96,27 +137,41 @@ export class ParticipantForm implements OnInit {
       status: data.status,
     };
 
+    const file = this.selectedFile;
+    const editId = this.editId;
     this.saving.set(true);
-    this.serverError.set('');
 
-    const request$ = this.editId !== null
-      ? this.participantService.updateParticipant(this.editId, payload)
-      : this.participantService.addParticipants(payload);
+    const save$ = editId !== null
+      ? this.participantService.updateParticipant(editId, payload).pipe(
+          switchMap(() => (file ? this.participantService.uploadLogo(editId, file) : of(null)))
+        )
+      : this.participantService.addParticipants(payload).pipe(
+          // If the logo upload fails, a retry must update this bank, not create a duplicate
+          tap(newId => {
+            if (newId !== undefined) this.editId = newId;
+          }),
+          switchMap(newId => {
+            if (!file) return of(null);
+            if (newId === undefined) return throwError(() => new Error('Missing id for logo upload'));
+            return this.participantService.uploadLogo(newId, file);
+          })
+        );
 
-    request$.subscribe({
-    next: () => {
-      this.notify.success(
-        this.editId !== null
-          ? 'Participant updated successfully.'
-          : 'Participant saved successfully.'
-      );
-      this.router.navigate(['/participants']);
-    },
-    error: () => {
-      this.notify.error('Could not save the participant. Please check the data and try again.');
-      this.saving.set(false);
-    },
-});
+    save$.subscribe({
+      next: () => {
+        this.notify.success(
+          editId !== null ? 'Participant updated successfully.' : 'Participant saved successfully.'
+        );
+        this.router.navigate(['/participants']);
+      },
+      error: err => {
+        // HTTP errors were already shown by the error interceptor
+        if (!(err instanceof HttpErrorResponse)) {
+          this.notify.error('The bank was saved, but its logo could not be uploaded.');
+        }
+        this.saving.set(false);
+      },
+    });
   }
 
   cancel(): void {

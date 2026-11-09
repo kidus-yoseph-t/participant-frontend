@@ -16,9 +16,7 @@ export class Participants implements OnInit {
   private notify = inject(NotificationServices);
   private participants = this.participantService.getParticipants();
 
-  error = this.participantService.error;
   searchTerm = signal('');
-
   pendingDelete = signal<ParticipantsModel | null>(null);
 
   deleteMessage = computed(() => {
@@ -37,14 +35,16 @@ export class Participants implements OnInit {
           p.name.toLowerCase().includes(term) ||
           p.bic.toLowerCase().includes(term))
       : all;
-
-    // return [...matches].sort((a, b) => a.name.localeCompare(b.name));
   });
 
   total = computed(() => this.participants().length);
 
   ngOnInit(): void {
     this.participantService.load();
+  }
+
+  logoUrl(p: ParticipantsModel): string | null {
+    return this.participantService.logoUrl(p);
   }
 
   askDelete(p: ParticipantsModel): void {
@@ -56,13 +56,14 @@ export class Participants implements OnInit {
   }
 
   confirmDelete(): void {
-    const p = this.pendingDelete();
-    if (!p) return;
-    this.pendingDelete.set(null);
+  const p = this.pendingDelete();
+  if (!p || p.id === undefined) return;
+  const id = p.id; 
+  this.pendingDelete.set(null);
 
-    this.participantService.deleteParticipant(p.id).subscribe({
-      next: () => this.notify.success(`"${p.name}" was deleted successfully.`),
-      error: () => this.notify.error('Could not delete the participant. Please try again.'),
-    });
-  }
+  this.participantService.deleteParticipant(id).subscribe({
+    next: () => this.notify.success(`"${p.name}" was deleted successfully.`),
+    error: () => {},
+  });
+}
 }

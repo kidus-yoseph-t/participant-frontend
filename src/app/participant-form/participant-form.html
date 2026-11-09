@@ -22,7 +22,7 @@
                        [class.is-invalid]="isInvalid('name')">
                 <label for="name">Name</label>
                 <div class="invalid-feedback">
-                  @if (hasError('name', 'required')) { Name is required. }
+                  @if (showError('name', 'required')) { Name is required. }
                 </div>
               </div>
             </div>
@@ -35,13 +35,13 @@
                        [class.is-invalid]="isInvalid('bic')">
                 <label for="bic">BIC</label>
                 <div class="invalid-feedback">
-                  @if (hasError('bic', 'required')) {
+                  @if (showError('bic', 'required')) {
                     BIC is required.
-                  } @else if (hasError('bic', 'minlength')) {
+                  } @else if (showError('bic', 'minlength')) {
                     BIC must be at least 8 characters.
-                  } @else if (hasError('bic', 'maxlength')) {
+                  } @else if (showError('bic', 'maxlength')) {
                     BIC must be at most 11 characters.
-                  } @else if (hasError('bic', 'pattern')) {
+                  } @else if (showError('bic', 'pattern')) {
                     BIC can contain only letters and numbers.
                   }
                 </div>
@@ -55,7 +55,7 @@
                        [class.is-invalid]="isInvalid('shortname')">
                 <label for="shortname">Short Name</label>
                 <div class="invalid-feedback">
-                  @if (hasError('shortname', 'required')) { Short name is required. }
+                  @if (showError('shortname', 'required')) { Short name is required. }
                 </div>
               </div>
             </div>
@@ -67,10 +67,11 @@
                         [class.is-invalid]="isInvalid('status')">
                   <option value="ACTIVE">ACTIVE</option>
                   <option value="INACTIVE">INACTIVE</option>
+                  <option value="SUSPENDED">SUSPENDED</option>
                 </select>
                 <label for="status">Status</label>
                 <div class="invalid-feedback">
-                  @if (hasError('status', 'required')) { Status is required. }
+                  @if (showError('status', 'required')) { Status is required. }
                 </div>
               </div>
             </div>
@@ -83,9 +84,9 @@
                        [class.is-invalid]="isInvalid('email')">
                 <label for="email">Email</label>
                 <div class="invalid-feedback">
-                  @if (hasError('email', 'required')) {
+                  @if (showError('email', 'required')) {
                     Email is required.
-                  } @else if (hasError('email', 'email')) {
+                  } @else if (showError('email', 'email')) {
                     Enter a valid email address.
                   }
                 </div>
@@ -100,19 +101,32 @@
                        [class.is-invalid]="isInvalid('phone')">
                 <label for="phone">Phone</label>
                 <div class="invalid-feedback">
-                  @if (hasError('phone', 'required')) { Phone number is required. }
+                  @if (showError('phone', 'required')) { Phone number is required. }
                 </div>
               </div>
             </div>
-
+                      <div class="col-12">
+            <label for="logo" class="form-label">Bank logo (PNG or JPG)</label>
+            <div class="d-flex align-items-center gap-3">
+              @if (previewUrl()) {
+                <img [src]="previewUrl()" alt="Logo preview" width="72" height="72"
+                    class="rounded-3 border bg-white object-fit-contain">
+              } @else {
+                <div class="rounded-3 border bg-light d-flex align-items-center justify-content-center
+                            text-body-secondary small"
+                    style="width: 72px; height: 72px;">No logo</div>
+              }
+              <input type="file" id="logo" accept="image/png,image/jpeg"
+                    class="form-control bg-light border-0 rounded-3"
+                    [class.is-invalid]="fileError()"
+                    (change)="onFileSelected($event)">
+            </div>
+            @if (fileError()) {
+              <div class="text-danger small mt-1">{{ fileError() }}</div>
+            }
           </div>
 
-          @if (serverError()) {
-            <div class="alert alert-danger rounded-3 mt-3 mb-0" role="alert">
-              {{ serverError() }}
-            </div>
-          }
-
+          </div>
           <div class="d-flex justify-content-end gap-2 mt-4">
             <button type="button" class="btn btn-outline-dark rounded-pill px-4"
                     (click)="cancel()">Cancel</button>
