@@ -1,73 +1,71 @@
-import { Service, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { inject, Service, signal } from '@angular/core';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { ParticipantsModel } from '../models/participants.model';
+
+interface ParticipantsResponse {
+  success: boolean;
+  institutions: ParticipantsModel[];
+}
 
 @Service()
 export class ParticipantService {
-  private readonly participants = signal<ParticipantsModel[]>([
-    {
-      id: 1,
-      name: 'Abay Bank',
-      bic: 'ABAYETAA',
-      shortName: 'AB',
-      email: 'abayBank@gmail.com',
-      phoneNumber: '+251 11 123 4567',
-      status: 'ACTIVE',
-    },
-    {
-      id: 2,
-      name: 'Bank of Abyssinia',
-      bic: 'ABYSETAA',
-      shortName: 'BA',
-      email: 'abyssiniaBank@gmail.com',
-      phoneNumber: '+251 11 987 6543',
-      status: 'ACTIVE',
-    },
-    {
-      id: 3,
-      name: 'Commercial Bank of Ethiopia',
-      bic: 'CBETETAA',
-      shortName: 'CBE',
-      email: 'commercialBank@gmail.com',
-      phoneNumber: '+251 11 456 7890',
-      status: 'INACTIVE',
-    },
-    {
-      id: 4,
-      name: 'Hibret Bank',
-      bic: 'UNTDETAA',
-      shortName: 'HB',
-      email: 'hibretBank@gmail.com',
-      phoneNumber: '+251 11 321 6549',
-      status: 'ACTIVE',
-    },
-    {
-      id: 5,
-      name: 'Zemen Bank',
-      bic: 'ZEMEETAA',
-      shortName: 'ZB',
-      email: 'zemenBank@gmail.com',
-      phoneNumber: '+251 11 654 3210',
-      status: 'ACTIVE',
-    },
-  ]);
+  private http = inject(HttpClient);
+  private readonly baseUrl = '/api/v1/participants';
 
-  // Read-only signal: components can read the list but can't replace it
+  private readonly participants = signal<ParticipantsModel[]>([]);
+  readonly loading = signal(false);
+  readonly error = signal('');
+
   getParticipants() {
     return this.participants.asReadonly();
   }
 
-  getById(id: number): ParticipantsModel | undefined {
-    return this.participants().find(p => p.id === id);
+  // GET /api/v1/participants
+  load(): void {
+    this.loading.set(true);
+    this.error.set('');
+    this.http.get<ParticipantsResponse>(this.baseUrl).subscribe({
+      next: res => {
+      if (!res.success) {
+        this.error.set('The server could not return participants.');
+      } else {
+        this.participants.set(res.institutions ?? []);
+      }
+      this.loading.set(false);
+      },
+      error: () => {
+        this.error.set(`Could not load participants.` );
+        this.loading.set(false);
+      },
+    });
   }
 
-  addParticipants(data: Omit<ParticipantsModel, 'id'>): void {
-    const nextId = Math.max(0, ...this.participants().map(p => p.id)) + 1;
-    this.participants.update(list => [...list, { id: nextId, ...data }]);
+  getById(id: number): Observable<ParticipantsModel | undefined> {
+    const cached = this.participants().find(p => p.id === id);
+    if (cached) return of(cached);
+
+    return this.http.get<ParticipantsResponse>(this.baseUrl).pipe(
+      tap(res => this.participants.set(res.institutions ?? [])),
+      map(res => res.institutions?.find(p => p.id === id)),
+      catchError(() => of(undefined))
+    );
   }
 
-  updateParticipant(id: number, data: Omit<ParticipantsModel, 'id'>): void {
-    this.participants.update(list =>
-      list.map(p => (p.id === id ? { id, ...data } : p))
+  // POST /api/v1/participants
+  addParticipants(data: Omit<ParticipantsModel, 'id'>): Observable<unknown> {
+    return this.http.post(this.baseUrl, data);
+  }
+
+  // PUT /api/v1/participants/{id}
+  updateParticipant(id: number, data: Omit<ParticipantsModel, 'id'>): Observable<unknown> {
+    return this.http.put(`${this.baseUrl}/${id}`, data);
+  }
+
+  // DELETE /api/v1/participants/{id}
+  deleteParticipant(id: number): Observable<unknown> {
+    return this.http.delete(`${this.baseUrl}/${id}`).pipe(
+      tap(() => this.participants.update(list => list.filter(p => p.id !== id)))
     );
   }
 }

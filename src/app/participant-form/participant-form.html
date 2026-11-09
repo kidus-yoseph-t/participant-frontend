@@ -15,7 +15,6 @@
         <form [formGroup]="addForm" (ngSubmit)="submit()" novalidate>
           <div class="row g-3">
 
-            <!-- Name -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="text" id="name" placeholder="Name" formControlName="name"
@@ -28,7 +27,6 @@
               </div>
             </div>
 
-            <!-- BIC -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="text" id="bic" placeholder="BIC" formControlName="bic"
@@ -50,7 +48,6 @@
               </div>
             </div>
 
-            <!-- Short name -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="text" id="shortname" placeholder="Short Name" formControlName="shortname"
@@ -63,7 +60,6 @@
               </div>
             </div>
 
-            <!-- Status -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <select id="status" formControlName="status"
@@ -79,7 +75,6 @@
               </div>
             </div>
 
-            <!-- Email -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="email" id="email" placeholder="Email" formControlName="email"
@@ -97,7 +92,6 @@
               </div>
             </div>
 
-            <!-- Phone -->
             <div class="col-12 col-md-6">
               <div class="form-floating">
                 <input type="tel" id="phone" placeholder="Phone" formControlName="phone"
@@ -113,11 +107,17 @@
 
           </div>
 
+          @if (serverError()) {
+            <div class="alert alert-danger rounded-3 mt-3 mb-0" role="alert">
+              {{ serverError() }}
+            </div>
+          }
+
           <div class="d-flex justify-content-end gap-2 mt-4">
             <button type="button" class="btn btn-outline-dark rounded-pill px-4"
                     (click)="cancel()">Cancel</button>
             <button type="submit" class="btn btn-brand rounded-pill px-4"
-                    [disabled]="addForm.invalid">
+                    [disabled]="addForm.invalid || saving()">
               {{ isEdit ? 'Update' : 'Save' }}
             </button>
           </div>

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ParticipantsModel } from '../core/models/participants.model';
@@ -17,6 +17,8 @@ export class ParticipantForm implements OnInit {
   private participantService = inject(ParticipantService);
 
   editId: number | null = null;
+  saving = signal(false);
+  serverError = signal('');
 
   get isEdit(): boolean {
     return this.editId !== null;
@@ -38,37 +40,39 @@ export class ParticipantForm implements OnInit {
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam === null) return;
+    if (idParam === null) return;                       // no :id in the URL, so add mode
 
     const id = Number(idParam);
-    const participant = Number.isInteger(id)
-      ? this.participantService.getById(id)
-      : undefined;
-
-    if (!participant) {
-      alert('Participant not found.');
-      this.router.navigate(['/participants']);
+    if (!Number.isInteger(id)) {
+      this.notFound();
       return;
     }
 
-    this.editId = id;
-    this.addForm.patchValue({
-      name: participant.name,
-      bic: participant.bic,
-      shortname: participant.shortName,
-      email: participant.email,
-      phone: participant.phoneNumber,
-      status: participant.status,
+    this.participantService.getById(id).subscribe(participant => {
+      if (!participant) {
+        this.notFound();
+        return;
+      }
+      this.editId = id;
+      this.addForm.patchValue({
+        name: participant.name,
+        bic: participant.bic,
+        shortname: participant.shortName,
+        email: participant.email,
+        phone: participant.phoneNumber,
+        status: participant.status,
+      });
     });
   }
 
-  // Red border: invalid AND touched
+  private notFound(): void {
+    alert('Participant not found.');
+    this.router.navigate(['/participants']);
+  }
   isInvalid(field: string): boolean {
     const control = this.addForm.get(field);
     return !!control && control.touched && control.invalid;
   }
-
-  // Specific message: this exact error AND touched
   hasError(field: string, error: string): boolean {
     const control = this.addForm.get(field);
     return !!control && control.touched && control.hasError(error);
@@ -90,12 +94,20 @@ export class ParticipantForm implements OnInit {
       status: data.status,
     };
 
-    if (this.editId !== null) {
-      this.participantService.updateParticipant(this.editId, payload);
-    } else {
-      this.participantService.addParticipants(payload);
-    }
-    this.router.navigate(['/participants']);
+    this.saving.set(true);
+    this.serverError.set('');
+
+    const request$ = this.editId !== null
+      ? this.participantService.updateParticipant(this.editId, payload)
+      : this.participantService.addParticipants(payload);
+
+    request$.subscribe({
+      next: () => this.router.navigate(['/participants']),
+      error: () => {
+        this.serverError.set('Could not save. Please check the data and try again.');
+        this.saving.set(false);
+      },
+    });
   }
 
   cancel(): void {
