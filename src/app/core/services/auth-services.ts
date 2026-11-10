@@ -3,17 +3,9 @@ import { inject, Service, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { NotificationServices } from './notification-services';
+import { LoginResponse } from '../models/response.model';
 
-interface LoginResponse {
-  access_token?: string;
-  accessToken?: string;
-  refresh_token?: string;
-  refreshToken?: string;
-  expires_in?: number;
-  expiresIn?: number;
-  token_type?: string;
-  tokenType?: string;
-}
+
 
 const LOGIN_URL = '/api/v1/auth/login';
 const CLIENT_ID = 'acs_apis_client_api';
