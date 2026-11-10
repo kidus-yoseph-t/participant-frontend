@@ -15,6 +15,8 @@ interface LoginResponse {
   tokenType?: string;
 }
 
+const LOGIN_URL = '/api/v1/auth/login';
+const CLIENT_ID = 'acs_apis_client_api';
 const TOKEN_KEY = 'auth_token';
 const EXPIRES_KEY = 'auth_expires_at';
 const DEFAULT_LIFETIME_SECONDS = 120;
@@ -42,14 +44,9 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<LoginResponse> {
-    const body = {
-      username,
-      password,
-      grant_type: 'password',
-      client_id: 'acs_apis_client_api',
-    };
+    const body = { username, password, grant_type: 'password', client_id: CLIENT_ID };
 
-    return this.http.post<LoginResponse>('/api/v1/auth/login', body).pipe(
+    return this.http.post<LoginResponse>(LOGIN_URL, body).pipe(
       tap(res => {
         const token = res.access_token ?? res.accessToken;
         if (!token) throw new Error('The login response did not contain an access token.');

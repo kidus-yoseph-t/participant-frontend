@@ -7,20 +7,17 @@ import { NotificationServices } from '../services/notification-services';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const notify = inject(NotificationServices);
+  const isApiCall = req.url.includes('/api/v1/');
+  const isLogin = req.url.includes('/auth/login');
 
-  if (req.url.includes('/auth/login') || !req.url.startsWith('/api/')) return next(req);
+  if (!isApiCall || isLogin) return next(req);
 
   if (!auth.isLoggedIn()) {
     if (auth.token()) {
       notify.error('Your session has expired. Please sign in again.');
       auth.logout();
     }
-
-    return throwError(() => new HttpErrorResponse({
-      status: 401,
-      statusText: 'Session expired',
-      url: req.url,
-    }));
+    return throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Session expired', url: req.url }));
   }
 
   return next(req.clone({ setHeaders: { Authorization: `Bearer ${auth.token()}` } }));

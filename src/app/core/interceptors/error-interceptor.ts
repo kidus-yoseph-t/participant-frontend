@@ -9,11 +9,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
 
   return next(req).pipe(
-    catchError((err: HttpErrorResponse) => {
+      catchError((err: HttpErrorResponse) => {
       const isLoginRequest = req.url.includes('/auth/login');
 
       if (!isLoginRequest) {
-        if (err.status === 401) auth.logout();
+        if (err.status === 401) {
+          if (!auth.token()) return throwError(() => err);
+          auth.logout();
+        }
         notify.error(friendlyMessage(err));
       }
       return throwError(() => err);
