@@ -1,56 +1,51 @@
-import { Component, inject, signal} from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../core/services/auth-services';
 
 @Component({
-  imports: [ ReactiveFormsModule],
   selector: 'app-login',
-  styleUrl: './login.css',
+  imports: [ReactiveFormsModule],
   templateUrl: './login.html',
 })
 export class Login {
-  private formbuilder = inject(FormBuilder);
+  private fb = inject(FormBuilder);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
-  private validUsername:string = 'admin';
-  private validPassword:string = 'Admin@123';
-
+  showPassword = signal(false);
   message = signal('');
   isSuccess = signal(false);
-  showPassword = signal(false);
 
-  loginForm = this.formbuilder.group({
-    username:  ['', Validators.required],
-    password:  ['', [Validators.required, Validators.minLength(8)]]
-  })
+  loginForm = this.fb.nonNullable.group({
+    username: ['', Validators.required],
+    password: ['', Validators.required],
+  });
 
-  get username(){
-    return this.loginForm.controls['username'];
-  }
-  get password(){
-    return this.loginForm.controls['password'];
-  }
+  get username() { return this.loginForm.controls.username; }
+  get password() { return this.loginForm.controls.password; }
 
-  toggle(){
-    this.showPassword.update(n=>!n)
+  toggle(): void {
+    this.showPassword.update(v => !v);
   }
 
-  submit() {
+  submit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       this.isSuccess.set(false);
-      this.message.set('Please fill in all required fields correctly.');
+      this.message.set('Username and password are required.');
       return;
     }
-    const {username, password} = this.loginForm.getRawValue();
 
-    if(username === this.validUsername && password === this.validPassword) {
-      this.isSuccess.set(true);
-      this.message.set('Login successful!');
-      this.router.navigate(['/participants']);
-    } else {
-      this.isSuccess.set(false);
-      this.message.set('Invalid username or password.');
-    }
+    const { username, password } = this.loginForm.getRawValue();
+    this.message.set('');
+
+    this.auth.login(username, password).subscribe({
+      next: () => this.router.navigate(['/participants']),
+      error: () => {
+        this.isSuccess.set(false);
+        this.message.set('Invalid username or password.');
+      },
+    });
   }
 }

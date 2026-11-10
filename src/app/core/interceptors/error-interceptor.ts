@@ -1,17 +1,26 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
+import { AuthService } from '../services/auth-services';
 import { NotificationServices } from '../services/notification-services';
+
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const notify = inject(NotificationServices);
+  const auth = inject(AuthService);
 
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
-      notify.error(friendlyMessage(err));
+      const isLoginRequest = req.url.includes('/auth/login');
+
+      if (!isLoginRequest) {
+        if (err.status === 401) auth.logout();
+        notify.error(friendlyMessage(err));
+      }
       return throwError(() => err);
     })
   );
 };
+
 
 function friendlyMessage(err: HttpErrorResponse): string {
   if (err.status === 0) {

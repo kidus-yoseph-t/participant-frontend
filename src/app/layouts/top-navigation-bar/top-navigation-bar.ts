@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth-services';
 
 @Component({
   imports: [],
@@ -8,9 +8,8 @@ import { Router } from '@angular/router';
   templateUrl: './top-navigation-bar.html',
 })
 export class TopNavigationBar {
-  private router = inject(Router);
-  logout(){
-    this.router.navigate(['/Login']);
-    console.log('Logout clicked');
+  private auth = inject(AuthService);
+    logout(){
+    this.auth.logout();
   }
 }

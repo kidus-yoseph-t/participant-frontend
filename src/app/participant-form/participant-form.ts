@@ -20,7 +20,7 @@ export class ParticipantForm implements OnInit {
   private participantService = inject(ParticipantService);
   private notify = inject(NotificationServices);
 
-  private readonly maxFileSize = 1024 * 1024;   // 1 MB (Spring's default upload limit)
+  private readonly maxFileSize = 1024 * 1024; 
   private existingLogoUrl: string | null = null;
   selectedFile: File | null = null;
 
@@ -49,7 +49,7 @@ export class ParticipantForm implements OnInit {
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam === null) return;                       // add mode
+    if (idParam === null) return;
 
     const id = Number(idParam);
     if (!Number.isInteger(id)) {
@@ -108,7 +108,6 @@ export class ParticipantForm implements OnInit {
 
     this.selectedFile = file;
 
-    // Instant preview
     const reader = new FileReader();
     reader.onload = () => this.previewUrl.set(reader.result as string);
     reader.readAsDataURL(file);
@@ -146,7 +145,6 @@ export class ParticipantForm implements OnInit {
           switchMap(() => (file ? this.participantService.uploadLogo(editId, file) : of(null)))
         )
       : this.participantService.addParticipants(payload).pipe(
-          // If the logo upload fails, a retry must update this bank, not create a duplicate
           tap(newId => {
             if (newId !== undefined) this.editId = newId;
           }),
@@ -165,7 +163,6 @@ export class ParticipantForm implements OnInit {
         this.router.navigate(['/participants']);
       },
       error: err => {
-        // HTTP errors were already shown by the error interceptor
         if (!(err instanceof HttpErrorResponse)) {
           this.notify.error('The bank was saved, but its logo could not be uploaded.');
         }

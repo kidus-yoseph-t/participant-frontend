@@ -3,31 +3,28 @@ import { Login } from './login/login'
 import { Participants } from './participants/participants'
 import { NotFound } from './not-found/not-found';
 import { ParticipantForm } from './participant-form/participant-form';
+import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: 'Login',
+        redirectTo: 'login',
         pathMatch: 'full'
     },
     {
-        path: 'Login',
+        path: 'login',
         component: Login,
         title: 'Login'
     },
+
     {
         path: 'participants',
-        component: Participants,
-        title: 'participants'
-    },
-    {
-        path:'participants/new',
-        component: ParticipantForm,
-        title: 'participants'
-    },
-    {
-        path: 'participants/edit/:id',
-        component: ParticipantForm 
+        canActivate: [authGuard],
+        children: [
+        { path: '', component: Participants, title: 'Participants' },
+        { path: 'new', component: ParticipantForm },
+        { path: 'edit/:id', component: ParticipantForm},
+        ],
     },
     {
         path: '**',
