@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth-services';
 import { NotificationServices } from '../services/notification-services';
+import { environment } from '../../../environments/environment';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const notify = inject(NotificationServices);
@@ -10,7 +11,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
       catchError((err: HttpErrorResponse) => {
-      const isLoginRequest = req.url.includes('/auth/login');
+      const isLoginRequest = req.url === `${environment.apiUrl}/auth/login`;
 
       if (!isLoginRequest) {
         if (err.status === 401) {

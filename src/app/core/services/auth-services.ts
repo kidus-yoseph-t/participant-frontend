@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { NotificationServices } from './notification-services';
 import { LoginResponse } from '../models/response.model';
+import { environment } from '../../../environments/environment';
 
 
 
-const LOGIN_URL = '/api/v1/auth/login';
-const CLIENT_ID = 'acs_apis_client_api';
+const LOGIN_URL = `${environment.apiUrl}/auth/login`;
+const CLIENT_ID = environment.clientId;
 const TOKEN_KEY = 'auth_token';
 const EXPIRES_KEY = 'auth_expires_at';
 const DEFAULT_LIFETIME_SECONDS = 120;

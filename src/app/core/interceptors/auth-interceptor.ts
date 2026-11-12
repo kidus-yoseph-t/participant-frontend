@@ -3,12 +3,13 @@ import { inject } from '@angular/core';
 import { throwError } from 'rxjs';
 import { AuthService } from '../services/auth-services';
 import { NotificationServices } from '../services/notification-services';
+import { environment } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const notify = inject(NotificationServices);
-  const isApiCall = req.url.includes('/api/v1/');
-  const isLogin = req.url.includes('/auth/login');
+  const isApiCall = req.url.startsWith(environment.apiUrl);
+  const isLogin = req.url === `${environment.apiUrl}/auth/login`;
 
   if (!isApiCall || isLogin) return next(req);
 

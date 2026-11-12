@@ -1,10 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service, signal } from '@angular/core';
-import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
+import { map, Observable, of, switchMap, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { ParticipantsModel } from '../models/participants.model';
 
 interface ParticipantsResponse {
-  success: boolean;
+  status: string;
+  message: string;
   institutions: ParticipantsModel[];
 }
 
@@ -17,8 +19,7 @@ interface CreateResponse {
 @Service()
 export class ParticipantService {
   private http = inject(HttpClient);
-  private readonly baseUrl = '/api/v1/participants';
-  private readonly logoBaseUrl = 'http://localhost:9081/uploads/logos/';
+  private readonly baseUrl = `${environment.apiUrl}/participants`;
 
   private readonly participants = signal<ParticipantsModel[]>([]);
 
@@ -33,23 +34,16 @@ export class ParticipantService {
     );
   }
 
-  // GET /api/v1/participants
   load(): void {
-
-    this.fetchAll().subscribe({ error: () => {} });
+    this.fetchAll().subscribe({ error: () => {} });   // the error interceptor already reported it
   }
 
   getById(id: number): Observable<ParticipantsModel | undefined> {
     const cached = this.participants().find(p => p.id === id);
     if (cached) return of(cached);
-
-    return this.fetchAll().pipe(
-      map(list => list.find(p => p.id === id)),
-      catchError(() => of(undefined))
-    );
+    return this.fetchAll().pipe(map(list => list.find(p => p.id === id)));
   }
 
-  // POST /api/v1/participants
   addParticipants(data: Omit<ParticipantsModel, 'id'>): Observable<number | undefined> {
     return this.http.post<CreateResponse>(this.baseUrl, data).pipe(
       switchMap(res => {
@@ -60,30 +54,27 @@ export class ParticipantService {
     );
   }
 
-  // PUT /api/v1/participants/{id}
   updateParticipant(id: number, data: Omit<ParticipantsModel, 'id'>): Observable<unknown> {
     return this.http.put(`${this.baseUrl}/${id}`, data);
   }
 
-  // DELETE /api/v1/participants/{id}
   deleteParticipant(id: number): Observable<unknown> {
     return this.http.delete(`${this.baseUrl}/${id}`).pipe(
       tap(() => this.participants.update(list => list.filter(p => p.id !== id)))
     );
   }
 
-  // POST /api/v1/participants/{id}/logo (multipart/form-data)
   uploadLogo(id: number, file: File): Observable<unknown> {
     const formData = new FormData();
-    formData.append('logo', file); 
+    formData.append('logo', file);
     return this.http.post(`${this.baseUrl}/${id}/logo`, formData);
   }
 
- logoUrl(p: ParticipantsModel): string | null {
-  if (!p.logoPath) return null;
-  if (/^https?:\/\//.test(p.logoPath)) return p.logoPath;
+  logoUrl(p: ParticipantsModel): string | null {
+    if (!p.logoPath) return null;
+    if (/^https?:\/\//.test(p.logoPath)) return p.logoPath;
 
-  const fileName = p.logoPath.split(/[\\/]/).pop(); 
-  return fileName ? `${this.logoBaseUrl}${encodeURIComponent(fileName)}` : null;
-}
+    const fileName = p.logoPath.split(/[\\/]/).pop();
+    return fileName ? `${environment.logoBaseUrl}${encodeURIComponent(fileName)}` : null;
+  }
 }
