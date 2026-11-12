@@ -40,10 +40,10 @@ export class AuthService {
 
     return this.http.post<LoginResponse>(LOGIN_URL, body).pipe(
       tap(res => {
-        const token = res.access_token ?? res.accessToken;
+        const token = res.access_token;
         if (!token) throw new Error('The login response did not contain an access token.');
 
-        const lifetime = res.expires_in ?? res.expiresIn ?? DEFAULT_LIFETIME_SECONDS;
+        const lifetime = res.expires_in ?? DEFAULT_LIFETIME_SECONDS;
         this.expiresAt = Date.now() + lifetime * 1000;
 
         sessionStorage.setItem(TOKEN_KEY, token);
