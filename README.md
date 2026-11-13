@@ -1,59 +1,107 @@
-# ParticipantFrontend
+# Participant Bank Portal
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.4.
+Angular frontend for managing participant banks. It lets user sign in, browse and search participant banks, add, edit and delete them, and upload a logo for each bank. It talks to a Spring Boot REST API that is secured with Keycloak (JWT).
 
-## Development server
+## Features
 
-To start a local development server, run:
+- Sign in through the backend's Keycloak login, with a route guard that protects all participant pages
+- Participant list with live search (by bank name or BIC), sorted alphabetically
+- Add and edit form built with Reactive Forms, with clear validation messages
+- Logo upload (PNG or JPG) with an instant preview
+- Delete with a confirmation dialog
+- Global loading spinner, success and error notifications, and friendly messages for network and server errors
+
+## Tech stack
+
+| Area | Technology |
+|---|---|
+| Frontend | Angular, TypeScript, RxJS |
+| Styling | Bootstrap 5 |
+| Backend | Spring Boot, PostgreSQL |
+| Authentication | Keycloak (OpenID Connect, JWT access tokens) |
+
+## Prerequisites
+
+| Tool | Notes |
+|---|---|
+| Node.js and npm | A current LTS version of Node.js |
+| Angular CLI | `npm install -g @angular/cli` |
+| Git | To clone and switch branches |
+| JDK | The version required by the backend (see its `build.gradle`) |
+| PostgreSQL | Running, with the database the backend is configured for |
+| Keycloak | Running and reachable from the backend (see Troubleshooting) |
+
+## 1. Run the backend
+
+The backend lives in a separate repository, `participant-bank-backend`.
 
 ```bash
+git clone https://github.com/Yibarek/participant-bank-backend.git
+cd participant-bank-backend
+git checkout branch3-auth-with-logo
+```
+
+Open `src/main/resources/application.properties` and check these settings:
+
+- the PostgreSQL URL, username and password
+- the Keycloak server URL, realm and client
+
+Build the baceknd:
+
+```bash
+./gradlew build
+```
+
+Start the backend:
+
+```bash
+./gradlew bootRun
+```
+The API is then available at `http://localhost:9081`.
+
+| Backend branch | What it adds |
+|---|---|
+| `branch1-no-auth-no-logo` | Participant CRUD, no authentication |
+| `branch2-no-auth-with-logo` | Adds logo upload |
+| `branch3-auth-with-logo` | Adds Keycloak authentication |
+
+## 2. Run the frontend
+
+```bash
+git clone https://github.com/kidus-yoseph-t/participant-frontend.git
+cd participant-frontend
+npm install
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open `http://localhost:4200`. The root URL redirects to `/login`.
 
-## Code scaffolding
+Sign in with the account that exists in your Keycloak realm. For this repository it is `admin` / `Password@123` (development account only).
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Configuration
 
-```bash
-ng generate component component-name
-```
+API addresses are not hardcoded in the services. They live in `src/environments/`:
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+| File | Used by |
+|---|---|
+| `environment.development.ts` | `ng serve` |
+| `environment.ts` | production builds (`ng build`) |
 
-```bash
-ng generate --help
-```
+| Setting | Meaning | Default |
+|---|---|---|
+| `apiUrl` | Base URL of the REST API | `http://localhost:9081/api/v1` |
+| `logoBaseUrl` | Where uploaded logos are served from | `http://localhost:9081/uploads/logos/` |
+| `clientId` | Keycloak client used for the login request | `myclient` |
 
-## Building
+To point the app at another server, edit these files. The backend must allow requests from the frontend's origin (`http://localhost:4200` in development) in its CORS settings.
 
-To build the project run:
 
-```bash
-ng build
-```
+## How authentication works
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+1. The login page sends the credentials to `POST /api/v1/auth/login`.
+2. The returned access token and its expiry time are stored in `sessionStorage`.
+3. An HTTP interceptor adds `Authorization: Bearer <token>` to every API request.
+4. The route guard blocks `/participants` and its child routes without a valid session.
+5. A 401 response, an expired token or the Logout button clears the session and returns to `/login`.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Access tokens are short-lived , so the app signs the user out soon after the token expires.
