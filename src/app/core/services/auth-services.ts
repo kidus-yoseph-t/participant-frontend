@@ -12,7 +12,7 @@ const LOGIN_URL = `${environment.apiUrl}/auth/login`;
 const CLIENT_ID = environment.clientId;
 const TOKEN_KEY = 'auth_token';
 const EXPIRES_KEY = 'auth_expires_at';
-const DEFAULT_LIFETIME_SECONDS = 120;
+const DEFAULT_LIFETIME_SECONDS = 300;
 
 @Service()
 export class AuthService {
