@@ -29,7 +29,7 @@ Angular frontend for managing participant banks. It lets user sign in, browse an
 | Git | To clone and switch branches |
 | JDK | The version required by the backend (see its `build.gradle`) |
 | PostgreSQL | Running, with the database the backend is configured for |
-| Keycloak | Running and reachable from the backend (see Troubleshooting) |
+| Keycloak | Running and reachable from the backend |
 
 ## 1. Run the backend
 
