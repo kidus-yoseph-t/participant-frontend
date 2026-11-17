@@ -58,6 +58,7 @@ and change these settings:
 - the Keycloak server URL, realm and client
 - the resource server issuer uri
 - the resource server jwk-set uri
+- username and password
 
 Build the baceknd:
 
