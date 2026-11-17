@@ -91,7 +91,7 @@ API addresses are not hardcoded in the services. They live in `src/environments/
 |---|---|---|
 | `apiUrl` | Base URL of the REST API | `http://localhost:9081/api/v1` |
 | `logoBaseUrl` | Where uploaded logos are served from | `http://localhost:9081/uploads/logos/` |
-| `clientId` | Keycloak client used for the login request | `myclient` |
+| `clientId` | Keycloak client used for the login request | `acs_apis_client_api` |
 
 To point the app at another server, edit these files. The backend must allow requests from the frontend's origin (`http://localhost:4200` in development) in its CORS settings.
 
