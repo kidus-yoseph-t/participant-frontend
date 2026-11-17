@@ -45,10 +45,16 @@ If you want you can setup your own keycloak server by following the steps on thi
 the backend for these files:
 
 Open `src/main/resources/application.properties` 
+
 Open `src/main/resources/application-dev.properties` 
+
 Open `src/main/resources/application-prod.properties` 
+
 open `src/main/java/org/multimedia/service/AuthenticationService.java`
-open `src/main/java/org/multimedia/config/SecurityConfig.java` and change these settings:
+
+open `src/main/java/org/multimedia/config/SecurityConfig.java` 
+
+and change these settings:
 - the Keycloak server URL, realm and client
 - the resource server issuer uri
 - the resource server jwk-set uri
