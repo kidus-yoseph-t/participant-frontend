@@ -40,8 +40,9 @@ git clone https://github.com/Yibarek/participant-bank-backend.git
 cd participant-bank-backend
 git checkout branch3-auth-with-logo
 ```
-If you want you can setup your own keycloak server by following the steps on this link
-`https://www.keycloak.org/getting-started/getting-started-docker` then change the settings on
+If you want you can setup your own keycloak server by following the steps on this guide
+
+[KeyCloak guide](https://www.keycloak.org/getting-started/getting-started-docker) then change the settings on
 the backend for these files:
 
 Open `src/main/resources/application.properties` 
@@ -58,7 +59,7 @@ and change these settings:
 - the Keycloak server URL, realm and client
 - the resource server issuer uri
 - the resource server jwk-set uri
-- username and password
+- the username and password
 
 Build the baceknd:
 
