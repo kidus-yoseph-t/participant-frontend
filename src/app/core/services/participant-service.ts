@@ -35,7 +35,7 @@ export class ParticipantService {
   }
 
   load(): void {
-    this.fetchAll().subscribe({ error: () => {} });   // the error interceptor already reported it
+    this.fetchAll().subscribe({ error: () => {} });
   }
 
   getById(id: number): Observable<ParticipantsModel | undefined> {
