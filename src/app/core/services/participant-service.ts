@@ -22,7 +22,7 @@ export class ParticipantService {
   private readonly baseUrl = `${environment.apiUrl}/participants`;
 
   private readonly participants = signal<ParticipantsModel[]>([]);
-
+  private logoVersions = new Map<number, number>();
   getParticipants() {
     return this.participants.asReadonly();
   }
@@ -55,8 +55,10 @@ export class ParticipantService {
   }
 
   updateParticipant(id: number, data: Omit<ParticipantsModel, 'id'>): Observable<unknown> {
-    return this.http.put(`${this.baseUrl}/${id}`, data);
-  }
+  return this.http.put(`${this.baseUrl}/${id}`, data).pipe(
+    switchMap(() => this.fetchAll())
+  );
+}
 
   deleteParticipant(id: number): Observable<unknown> {
     return this.http.delete(`${this.baseUrl}/${id}`).pipe(
@@ -65,16 +67,26 @@ export class ParticipantService {
   }
 
   uploadLogo(id: number, file: File): Observable<unknown> {
-    const formData = new FormData();
-    formData.append('logo', file);
-    return this.http.post(`${this.baseUrl}/${id}/logo`, formData);
-  }
+  const formData = new FormData();
+  formData.append('logo', file);
+  return this.http.post(`${this.baseUrl}/${id}/logo`, formData).pipe(
+    tap(() => this.logoVersions.set(id, Date.now())),
+    switchMap(() => this.fetchAll())
+  );
+}
 
   logoUrl(p: ParticipantsModel): string | null {
-    if (!p.logoPath) return null;
-    if (/^https?:\/\//.test(p.logoPath)) return p.logoPath;
+  if (!p.logoPath) return null;
 
+  let url: string;
+  if (/^https?:\/\//.test(p.logoPath)) {
+    url = p.logoPath;
+  } else {
     const fileName = p.logoPath.split(/[\\/]/).pop();
-    return fileName ? `${environment.logoBaseUrl}${encodeURIComponent(fileName)}` : null;
+    if (!fileName) return null;
+    url = `${environment.logoBaseUrl}${encodeURIComponent(fileName)}`;
   }
+  const v = p.id !== undefined ? this.logoVersions.get(p.id) : undefined;
+  return v ? `${url}${url.includes('?') ? '&' : '?'}v=${v}` : url;
+}
 }
